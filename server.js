@@ -157,3 +157,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
   console.log(`==================================================\n`);
 });
+
+module.exports = app;
+
