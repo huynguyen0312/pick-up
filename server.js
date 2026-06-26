@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 5000;
 // === CẤU HÌNH SMTP GỬI EMAIL ===
 const SMTP_CONFIG = {
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_SECURE === 'true' || false, // true cho port 465, false cho 587
+  port: parseInt(process.env.SMTP_PORT) || 465,
+  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : true, // mặc định true cho port 465 (SSL)
   auth: {
     user: (process.env.SMTP_USER || 'amshuuhuy10@gmail.com').trim(), // Gmail gửi mail
     pass: (process.env.SMTP_PASS || 'cezw mipq iuqt onol').replace(/\s+/g, '') // Mật khẩu ứng dụng Gmail (App Password)
@@ -45,7 +45,7 @@ app.post('/api/pickup', (req, res) => {
   console.log(`🗺️ Bản đồ Google Maps: ${google_maps_link}`);
   console.log('==================================================\n');
 
-  // Khởi tạo transporter SMTP
+  // Khởi tạo transporter SMTP với cấu hình timeouts để tránh treo kết nối
   const transporter = nodemailer.createTransport({
     host: SMTP_CONFIG.host,
     port: SMTP_CONFIG.port,
@@ -53,7 +53,10 @@ app.post('/api/pickup', (req, res) => {
     auth: {
       user: SMTP_CONFIG.auth.user,
       pass: SMTP_CONFIG.auth.pass
-    }
+    },
+    connectionTimeout: 10000, // 10 giây timeout kết nối
+    greetingTimeout: 10000,   // 10 giây timeout chào hỏi SMTP
+    socketTimeout: 10000      // 10 giây timeout socket
   });
 
   const mailOptions = {
@@ -104,7 +107,10 @@ app.post(['/api/feedback', '/api/pickup/feedback'], (req, res) => {
     host: SMTP_CONFIG.host,
     port: SMTP_CONFIG.port,
     secure: SMTP_CONFIG.secure,
-    auth: { user: SMTP_CONFIG.auth.user, pass: SMTP_CONFIG.auth.pass }
+    auth: { user: SMTP_CONFIG.auth.user, pass: SMTP_CONFIG.auth.pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 
   const stars = '⭐'.repeat(star || 0);
