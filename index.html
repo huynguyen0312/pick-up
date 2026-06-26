@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tai xe mini</title>
+
+  <!-- Font chữ dễ thương và hiện đại -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- CSS của Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    // Chỉ hiển thị khung ảnh khi có ít nhất một ảnh mèo được tải thành công
+    function handleImageLoad(img) {
+      document.getElementById('cat-gallery-container').style.display = 'block';
+    }
+  </script>
+</head>
+
+<body>
+
+  <!-- Background chứa các bé mèo/dấu chân bay -->
+  <div class="cat-bg" id="cat-bg"></div>
+
+  <!-- Container chính -->
+  <main class="app-container">
+    <div class="glass-card" id="main-card">
+
+      <!-- Header -->
+      <header class="header">
+        <h1 class="title">Xe mini</h1>
+        <p class="subtitle">Bạn đang ở đâu thế? Chọn địa điểm hoặc gõ tìm kiếm để mình qua đón nhé!</p>
+      </header>
+
+
+      <!-- Form nhập liệu -->
+      <form id="pickup-form" class="pickup-form" onsubmit="return false;">
+
+        <!-- Nhập tên người cần đón -->
+        <div class="form-group">
+          <label for="pickup-name">👤 Tên của bạn</label>
+          <input type="text" id="pickup-name" placeholder="Nhập tên của bạn..." required>
+        </div>
+
+        <!-- Email để nhận feedback -->
+        <div class="form-group">
+          <label for="pickup-email">📧 Email của bạn <span class="label-optional">(tùy chọn)</span></label>
+          <input type="email" id="pickup-email" placeholder="email@example.com">
+        </div>
+
+        <!-- Ô tìm kiếm hoặc nhập địa chỉ thủ công -->
+        <div class="form-group search-container">
+          <label for="address-search">📍 Địa chỉ đón (Nhập trực tiếp hoặc chọn trên bản đồ)</label>
+          <div class="search-input-wrapper">
+            <input type="text" id="address-search" placeholder="Nhập địa chỉ của bạn..." autocomplete="off">
+            <button type="button" id="clear-search-btn" class="clear-btn" aria-label="Xóa tìm kiếm">&times;</button>
+          </div>
+          <!-- Dropdown danh sách gợi ý -->
+          <ul id="search-suggestions" class="suggestions-list hidden"></ul>
+        </div>
+
+        <!-- Bản đồ chọn địa điểm trực quan -->
+        <div class="form-group map-group">
+          <label>🗺️ Hoặc click trực tiếp lên bản đồ để ghim vị trí</label>
+          <div id="map-container">
+            <div id="map"></div>
+            <button type="button" id="locate-btn" class="locate-btn" title="Định vị vị trí hiện tại của tôi">
+              <svg viewBox="0 0 24 24" class="locate-icon">
+                <path
+                  d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
+              </svg>
+            </button>
+          </div>
+          <p class="address-display" id="address-display">Đang tải bản đồ...</p>
+        </div>
+
+        <!-- Chọn thời gian đón -->
+        <div class="form-group">
+          <label for="pickup-time">⏰ Thời gian đón mong muốn</label>
+          <input type="datetime-local" id="pickup-time" required>
+        </div>
+
+        <!-- Lời nhắn thêm -->
+        <div class="form-group">
+          <label for="pickup-notes">🐾 Lời nhắn (nếu có)</label>
+          <textarea id="pickup-notes" rows="2" placeholder="Ví dụ: Mang găng tay,...."></textarea>
+        </div>
+
+        <!-- Nút gửi -->
+        <button type="submit" id="submit-btn" class="submit-btn">
+          <span>Gửi định vị</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Màn hình chúc mừng sau khi gửi thành công -->
+    <div class="glass-card success-card hidden" id="success-card">
+      <div class="success-cat-wrapper">
+        <div class="success-cat">🐱</div>
+      </div>
+      <h2 class="success-title">Đã gửi thành công!</h2>
+      <p class="success-text" id="success-text-content"></p>
+
+      <div class="details-box">
+        <p><strong>👤 Họ tên:</strong> <span id="summary-name"></span></p>
+        <p><strong>📍 Điểm đón:</strong> <span id="summary-address"></span></p>
+        <p><strong>⏰ Thời gian:</strong> <span id="summary-time"></span></p>
+      </div>
+
+      <div class="success-actions">
+        <button type="button" id="edit-btn" class="secondary-btn">Sửa lại địa chỉ</button>
+      </div>
+
+      <!-- Feedback Section -->
+      <div class="feedback-section" id="feedback-section">
+        <div class="feedback-divider"><span>🐾</span></div>
+        <p class="feedback-prompt">Sau khi đón xong, cho mình biết nhé! 😊</p>
+
+        <!-- Đánh giá sao -->
+        <div class="star-rating-wrap">
+          <div class="star-rating" id="star-rating" role="group" aria-label="Đánh giá">
+            <button class="star-btn" data-value="1" type="button" title="Tệ quá">★</button>
+            <button class="star-btn" data-value="2" type="button" title="Chưa ổn lắm">★</button>
+            <button class="star-btn" data-value="3" type="button" title="Bình thường">★</button>
+            <button class="star-btn" data-value="4" type="button" title="Vui lắm!">★</button>
+            <button class="star-btn" data-value="5" type="button" title="Tuyệt vời!">★</button>
+          </div>
+          <span class="star-label" id="star-label">Chọn đánh giá của bạn</span>
+        </div>
+
+        <!-- Nhận xét -->
+        <textarea id="feedback-text" class="feedback-textarea" rows="2"
+          placeholder="Chuyến đi thế nào? Chia sẻ cảm nhận nhé 🐱"></textarea>
+
+        <!-- Upload ảnh kỷ niệm -->
+        <input type="file" id="feedback-photo" accept="image/*" class="photo-input-hidden">
+        <label for="feedback-photo" class="photo-upload-label" id="photo-upload-label">
+          <span>📷</span>
+          <span class="photo-upload-text">Thêm ảnh kỷ niệm</span>
+        </label>
+        <div class="photo-preview-wrap hidden" id="photo-preview-wrap">
+          <img id="photo-preview-img" src="" alt="Preview" class="photo-preview-img">
+          <button type="button" class="remove-photo-btn" id="remove-photo-btn" title="Xóa ảnh">✕</button>
+        </div>
+
+        <!-- Nút gửi feedback -->
+        <button type="button" id="feedback-submit-btn" class="feedback-submit-btn">
+          <span>Gửi feedback 💌</span>
+        </button>
+      </div>
+
+      <!-- Cảm ơn sau khi gửi feedback -->
+      <div class="feedback-thanks hidden" id="feedback-thanks">
+        <div class="thanks-cat">🥰</div>
+        <p class="thanks-text">Cảm ơn bạn đã chia sẻ! Mình sẽ cố gắng hơn lần sau nha~ 🐱</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- JS của Leaflet Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Config và Logic App -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Lưu ý bảo mật:
+# Nếu bạn để repository ở chế độ CÔNG KHAI (Public) trên GitHub:
+# Hãy cẩn thận không commit các thông tin nhạy cảm như TELEGRAM_BOT_TOKEN vào config.js.
+# Nếu repository ở chế độ RIÊNG TƯ (Private), bạn có thể commit thoải mái mà không lo bị lộ.
