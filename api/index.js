@@ -29,7 +29,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' })); // tăng limit cho base64 ảnh feedback
 
 // Serve frontend static files (HTML, CSS, JS, ảnh) từ thư mục public
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Endpoint để nhận thông tin đón bạn và gửi SMTP Mail
 app.post('/api/pickup', (req, res) => {
@@ -149,7 +149,7 @@ app.post(['/api/feedback', '/api/pickup/feedback'], (req, res) => {
 
 // Serve index.html cho mọi route còn lại từ thư mục public
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // Khởi chạy server
