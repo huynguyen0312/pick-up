@@ -11,10 +11,10 @@ const SMTP_CONFIG = {
   port: parseInt(process.env.SMTP_PORT) || 587,
   secure: process.env.SMTP_SECURE === 'true' || false, // true cho port 465, false cho 587
   auth: {
-    user: process.env.SMTP_USER || 'amshuuhuy10@gmail.com', // Gmail gửi mail
-    pass: process.env.SMTP_PASS || 'cezw mipq iuqt onol' // Mật khẩu ứng dụng Gmail (App Password)
+    user: (process.env.SMTP_USER || 'amshuuhuy10@gmail.com').trim(), // Gmail gửi mail
+    pass: (process.env.SMTP_PASS || 'cezw mipq iuqt onol').replace(/\s+/g, '') // Mật khẩu ứng dụng Gmail (App Password)
   },
-  to: process.env.SMTP_TO || process.env.SMTP_USER || 'amshuuhuy10@gmail.com' // Email nhận thông báo
+  to: (process.env.SMTP_TO || process.env.SMTP_USER || 'amshuuhuy10@gmail.com').trim() // Email nhận thông báo
 };
 
 // Cấu hình CORS để cho phép trang web từ GitHub Pages gửi request đến server của bạn
@@ -90,8 +90,8 @@ app.post('/api/pickup', (req, res) => {
   });
 });
 
-// Endpoint nhận feedback sau khi đón xong
-app.post('/api/feedback', (req, res) => {
+// Endpoint nhận feedback sau khi đón xong (hỗ trợ cả /api/feedback và /api/pickup/feedback)
+app.post(['/api/feedback', '/api/pickup/feedback'], (req, res) => {
   const { name, email, star, star_label, feedback_text, photo_base64, address, pickup_time } = req.body;
 
   console.log('\n==================================================');
