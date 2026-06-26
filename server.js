@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -27,8 +28,8 @@ app.use(cors({
 // Middleware để đọc JSON body từ request
 app.use(express.json({ limit: '10mb' })); // tăng limit cho base64 ảnh feedback
 
-// Serve frontend static files (HTML, CSS, JS, ảnh)
-app.use(express.static(__dirname));
+// Serve frontend static files (HTML, CSS, JS, ảnh) từ thư mục public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Endpoint để nhận thông tin đón bạn và gửi SMTP Mail
 app.post('/api/pickup', (req, res) => {
@@ -146,9 +147,9 @@ app.post(['/api/feedback', '/api/pickup/feedback'], (req, res) => {
   });
 });
 
-// Serve index.html cho mọi route còn lại
+// Serve index.html cho mọi route còn lại từ thư mục public
 app.get('*', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Khởi chạy server
