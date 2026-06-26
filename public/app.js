@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let searchDebounceTimer = null;
   let selectedStar = 0;
   let feedbackPhotoBase64 = null;
+  let currentBookingId = null;
 
   // === 1. TẠO MÈO/DẤU CHÂN BAY NHẸ NHÀNG Ở BACKGROUND ===
   function createFloatingCats() {
@@ -625,7 +626,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: JSON.stringify(payload)
       });
-      return response.ok;
+      if (response.ok) {
+        const data = await response.json();
+        currentBookingId = data.booking_id;
+        return true;
+      }
+      return false;
     } catch (e) {
       console.error('Lỗi kết nối tới Custom API Server:', e);
       return false;
@@ -849,6 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function sendFeedbackToCustomAPI(fb) {
     try {
+      fb.booking_id = currentBookingId;
       await fetch(`${config.SERVER_URL}/feedback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
